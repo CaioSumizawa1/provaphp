@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
+use App\Models\Post;
 use App\Models\User;
-use App\Models\post;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class PostPolicy
@@ -25,10 +25,10 @@ class PostPolicy
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\post  $post
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, post $post)
+    public function view(User $user, Post $post)
     {
         //
     }
@@ -48,10 +48,10 @@ class PostPolicy
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\post  $post
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, post $post)
+    public function update(User $user, Post $post)
     {
         //
     }
@@ -60,10 +60,10 @@ class PostPolicy
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\post  $post
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, post $post)
+    public function delete(User $user, Post $post)
     {
         //
     }
@@ -72,10 +72,10 @@ class PostPolicy
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\post  $post
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, post $post)
+    public function restore(User $user, Post $post)
     {
         //
     }
@@ -84,10 +84,10 @@ class PostPolicy
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\post  $post
+     * @param  \App\Models\Post  $post
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, post $post)
+    public function forceDelete(User $user, Post $post)
     {
         //
     }

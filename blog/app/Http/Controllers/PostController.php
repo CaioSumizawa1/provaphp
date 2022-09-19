@@ -2,91 +2,105 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\post;
-use App\Http\Requests\StorepostRequest;
-use App\Http\Requests\UpdatepostRequest;
+use App\Models\Post;
+use App\Models\Comment;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-
-     */
-    public function index(request $request)
+    /*Mostrar  todos*/
+    public function index(Request $request)
     {
-        $post = post::all;
-        return $post;
-        //
+        return Post::all();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     */
-    public function create(Request $request)
-    { 
-      $post = new post; 
-      $post->usuario = $request->usuario;
-      $post->titulo = $request->titulo;
-      $post->descreicao = $request->descricao;
-      $post->save();
-      
-      $request->json([
-        "mesagem" => "post criado com sucesso"   
-    ],200);
-    }
-    
+    /*creiar post*/
 
-    /**
-     * Store a newly created resource in storage.
-     *
-
-     */
-
-    /**
-     * Display the specified resource.
-     *
-     */
-    public function show(request $request)
+    public function store(Request $request)
     {
-        $post = post::find($request->id);
-        return $post;
-        
-        //
-    
+        $validated = Validator::make($request->all(),[
+            'usuario' => ['required', 'max:20'],
+            'titulo' => ['required', 'max:30'],
+            'descricao' => ['required', 'max:255'],
+
+        ]);
+
+
+        if(!$validated->fails()){
+
+
+            $post = new Post;
+
+            $post->usuario = $request->usuario;
+            $post->titulo = $request->titulo;
+            $post->descricao = $request->descricao;
+
+            $post->save();
+
+            return response()->json([
+                "message" => "Seu post foi enviado"
+            ], 201);
+
+        } else {
+
+        return response()->json([
+            "message" => $validated->errors()->all()
+        ], 500);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-
-     */
-    public function edit(request $request)
+    /* Mostrar um post*/
+    public function show(Request $request, $id)
     {
-       $post = post::find(request->id);
-       $post->usuario = $request->usuario;
-       $post->titulo = $request->titulo;
-       $post->descreicao = $request->descricao;
-      
-      $request->json([
-        "mesagem" => "postagem Atualizdo com sucesso"   
-    ],200);
-        //
+        if (Post::where('id', $id)->exists()) {
+            $post = Post::find($id);
+            
+            return response($post, 200);
+          } else {
+            return response()->json([
+              "message" => "Post não encontrado"
+            ], 404);
+          }
     }
 
-    /**
-
-     */
-    
-    public function destroy(post $post)
+    /*Editar post*/
+    public function edit(Request $request, $id)
     {
-        $post = post::find(request->id);
-        $post->delete();
-        
-        $request->json([
-            "mesagem" => "post deletado com sucesso"   
-        ],200);
-        //
+        if (Post::where('id', $id)->exists()) {
+
+            $post = Post::find($id);
+            $post->titulo = is_null($request->titulo) ? $post->titulo : $request->titulo;
+            $post->descricao = is_null($request->descricao) ? $post->descricao : $request->descricao;
+            $post->save();
+
+            return response()->json([
+                "message" => "Post editado com sucesso"
+            ], 200);
+
+            } else {
+            return response()->json([
+                "message" => "Post não encontrado"
+            ], 404);
+
+        }
+    }
+
+    /*deletar post.*/
+    public function destroy(Request $request, $id)
+    {
+        if(Post::where('id', $id)->exists()) {
+            $post = Post::find($id);
+            $post->delete();
+            return response()->json([
+              "message" => "Post apagado com sucesso"
+            ], 202);
+          } else {
+            return response()->json([
+              "message" => "Post não encontrado"
+            ], 404);
+          }
     }
 }

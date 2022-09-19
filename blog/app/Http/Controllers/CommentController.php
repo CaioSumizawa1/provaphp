@@ -2,61 +2,106 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\comment;
-use App\Http\Requests\StorecommentRequest;
-use App\Http\Requests\UpdatecommentRequest;
+use App\Models\Comment;
+use App\Models\Post;
+use App\Http\Requests\StoreCommentRequest;
+use App\Http\Requests\UpdateCommentRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CommentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(request $request)
+     /*Mostrar  todos*/
+    public function index(Request $request, $id)
     {
-        $post = post::all;
-        return $post;
+        return Comment::where('fk_postagem_id', $id)->get();
     }
 
-  
-     
-
-     
-    public function create(request $request)
+    public function store(Request $request, $id)
     {
-        //
+        $validated = Validator::make($request->all(),[
+            'descricao' => ['required', 'max:255'],
+            'usuario' => ['required', 'max:20'],  
+        ]);
+
+        if(!$validated->fails()){
+            $comment = new Comment;
+            $comment->descricao = $request->descricao;
+            $comment->usuario = $request->usuario;
+            $comment->fk_postagem_id = $request->id;
+            $comment->save();
+
+            return response()->json([
+                "message" => "Comentário enivado corretamente"
+            ], 201);
+        } else {
+        return response()->json([
+            "message" => $validated->errors()->all()
+        ], 500);
+        }   
+    }
+
+    /* Mostrar um item*/
+    public function show(Request $request, $id, $id_comentario)
+    {
+        if (Comment::where('id', $id_comentario)->exists()) {
+            $comment = Comment::find($id_comentario);
+            if(!($comment->fk_postagem_id == $id)){
+                return response($comment, 200)->json([
+                    "message" => "Comentário não encontrado no post"
+                ], 404);
+            }
+            return response($comment, 200);
+          } else {
+            return response()->json([
+              "message" => "Comentário não encontrado"
+            ], 404);
+          }
+    }
+
+    /* Show the form for editing the specified resource.*/
+    public function edit(Request $request, $id, $id_comentario)
+    {
+        if (Comment::where('id', $id_comentario)->exists()) {
+            $comment = Comment::find($id_comentario);
+            if(!($comment->fk_postagem_id == $id)){
+                return response()->json([
+                    "message" => "Comentário não encontrado no post"
+                ], 404);
+            }
+            $comment->descricao = ($request->has('descricao')) ? $request->descricao : $comment->descricao;
+            $comment->save();
+            return response()->json([
+                "message" => "Comentário editado com sucesso"
+            ], 200);
+            } else {
+            return response()->json([
+                "message" => "Comentário não encontrado"
+            ], 404);
+        }
     }
 
 
-     
-   
-    
-    
-    public function show(request $request)
+    /*Remove the specified resource from storage.*/
+    public function destroy(Request $request, $id, $id_comentario)
     {
-        $comment = comment::find($request->id);
-        return $comment;
-    }
+        if(Comment::where('id', $id_comentario)->exists()) {
 
-    /**
-     */
-    public function edit(request $request)
-    {
-        //
-    }
+            $comment = Comment::find($id_comentario);
 
-
-   
-     
-    public function destroy(request $request)
-    {
-        $comment = comment::find(request->id);
-        $comment->delete();
-        
-        $request->json([
-            "mesagem" => "comentario deletado com sucesso"   
-        ],200);
-        //
+            if(!($comment->fk_postagem_id == $id)){
+                return response()->json([
+                    "message" => "Comentário não encontrado no post"
+                ], 404);
+            }
+            $comment->delete();
+            return response()->json([
+              "message" => "Comentário apagado com sucesso"
+            ], 202);
+          } else {
+            return response()->json([
+              "message" => "Comentário não encontrado"
+            ], 404);
+          }
     }
 }
